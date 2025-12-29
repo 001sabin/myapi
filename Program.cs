@@ -14,6 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//automapper ko registration
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddScoped<EmployeeService>();
 
