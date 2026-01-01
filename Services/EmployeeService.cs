@@ -2,8 +2,12 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using myapi.Data;
+using myapi.Delegates;
 using myapi.DTOs;
 using myapi.Model;
+
+
+using myapi.Repositories;
 
 namespace myapi.Services
 {
@@ -11,22 +15,31 @@ namespace myapi.Services
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
-
-        public EmployeeService(AppDbContext context, IMapper mapper)
+        public EmployeeCreatedHandler? OnEmployeeCreated;
+        
+        private readonly IEmployeeRepository _dapperRepository;
+        public EmployeeService(AppDbContext context, IMapper mapper, IEmployeeRepository dapperRepository)
         {
             _context = context;
             _mapper = mapper;
+            _dapperRepository = dapperRepository;
         }
 
         public async Task<List<EmployeeResponseDto>> GetEmployeesAsync()
         {
-            var employees = await _context.Employees.ToListAsync();
+            //var employees = await _context.Employees.ToListAsync();
+            //return _mapper.Map<List<EmployeeResponseDto>>(employees);
+
+            var employees = await _dapperRepository.GetAllEmployeesAsync();
             return _mapper.Map<List<EmployeeResponseDto>>(employees);
         }
 
         public async Task<EmployeeResponseDto?> GetEmployeeByIdAsync(int id)
         {
-            var employee=  await _context.Employees.FindAsync(id);
+            //var employee=  await _context.Employees.FindAsync(id);
+            //return employee == null ? null : _mapper.Map<EmployeeResponseDto>(employee);
+
+            var employee = await _dapperRepository.GetEmployeeByIdAsync(id);
             return employee == null ? null : _mapper.Map<EmployeeResponseDto>(employee);
         }
 
@@ -36,6 +49,9 @@ namespace myapi.Services
             var employee = _mapper.Map<Employee>(createDto);
             _context.Employees.Add(employee);
             await _context.SaveChangesAsync();
+
+            //OnEmployeeCreated?.Invoke(employee);
+
             return _mapper.Map<EmployeeResponseDto>(employee);
         }
 
@@ -66,20 +82,6 @@ namespace myapi.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-        //// Patch applying + saving (ModelState validation should stay in controller)
-        //public async Task<bool> ApplyPatchAndSaveAsync(int id, JsonPatchDocument<Employee> patchDocument)
-        //{
-        //    var employee = await _context.Employees.FindAsync(id);
-        //    if (employee == null) return false;
-
-
-        //    //patch vaneko = replace add or remove
-        //    patchDocument.ApplyTo(employee);
-
-        //    await _context.SaveChangesAsync();
-        //    return true;
-        //}
 
       
         public async Task<bool> PatchEmployeeAsync(int id, JsonPatchDocument<UpdateEmployeeDto> patchDocument)
@@ -146,15 +148,6 @@ namespace myapi.Services
             return _mapper.Map<List<EmployeeResponseDto>>(employees);
         }
 
-        //// Bonus: Simple method to get high salary employees
-        //public async Task<List<EmployeeResponseDto>> GetHighSalaryEmployeesAsync(decimal minSalary = 1000)
-        //{
-        //    var query = _context.Employees
-        //        .Where(e => e.Salary > minSalary)
-        //        .OrderByDescending(e => e.Salary);
-
-        //    var employees = await query.ToListAsync();
-        //    return _mapper.Map<List<EmployeeResponseDto>>(employees);
-        //}
+       
     }
 }
