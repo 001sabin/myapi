@@ -11,12 +11,22 @@ namespace myapi.Repositories
         Task<IEnumerable<Employee>> GetAllEmployeesAsync();
 
 
-        Task<Employee> CreateAsync(Employee employee);
+        Task<Employee> CreateEmployeeAsync(Employee employee);
 
-        Task<bool> UpdateAsync(Employee employee);
+        Task<bool> UpdateEmployeeAsync(Employee employee);
 
-        Task<bool> DeleteAsync(int id);
+        Task<bool> DeleteEmployeeAsync(int id);
+
+        Task<IEnumerable<Employee>> SearchEmployeesAsync(
+            string? department,
+            decimal? minSalary,
+            decimal? maxSalary,
+            string? nameContains,
+            string? positionContains,
+            int page,
+            int pageSize);
+    
 
 
-    }
+}
 }

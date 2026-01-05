@@ -27,9 +27,10 @@ Action<DbContextOptionsBuilder> myDelegate = ConfigureDbContext;
 builder.Services.AddDbContext<AppDbContext>(myDelegate);
 
 
-// Dapper through get y id implement garna lai 
-builder.Services.AddScoped<IEmployeeRepository, DapperRepository>();
-
+// Dapper through get method implement garna lai 
+builder.Services.AddScoped<IEmployeeRepository, DapperEmployeeRepository>();
+//Ef through bata method implement garna lai 
+//builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
 
 //automapper ko registration
 builder.Services.AddAutoMapper(typeof(Program));
