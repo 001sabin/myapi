@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using myapi.DTOs;
+using myapi.ExtensionMethods;
 using myapi.Filter;
 using myapi.Model;
 using myapi.Services;
+//using Serilog;
 
 namespace myapi.Controllers
 {
@@ -13,13 +15,15 @@ namespace myapi.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly EmployeeService _service;
+        private readonly ILogger<EmployeesController> _logger;
 
-       // private readonly IMapper _mapper;
+        // private readonly IMapper _mapper;
 
-        public EmployeesController(EmployeeService service)
+        public EmployeesController(EmployeeService service, ILogger<EmployeesController> logger)
         {
             _service = service;
-          //  _mapper = mapper;
+            _logger = logger;
+            //  _mapper = mapper;
         }
 
         [HttpGet]
@@ -32,17 +36,23 @@ namespace myapi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeResponseDto>> GetEmployee(int id)
         {
+            _logger.LogInformation("Fetching employee with ID: {EmployeeId}", id);
             var employee = await _service.GetEmployeeByIdAsync(id);
 
             if (employee == null)
+            {
+                _logger.LogWarning("Employee with ID: {EmployeeId} was not found", id);
                 return NotFound("Employee not found");
-
+            }
             return Ok(employee);
         }
 
         [HttpPost]
         public async Task<ActionResult<EmployeeResponseDto>> CreateEmployee(CreateEmployeeDto createDto)
         {
+            //if (!createDto.Name.IsValidEmployeeName())
+            //    return BadRequest("Invalid employee name");
+
             var created = await _service.CreateEmployeeAsync(createDto);
             return CreatedAtAction(nameof(GetEmployee), new { id = created.Id }, created);
         }

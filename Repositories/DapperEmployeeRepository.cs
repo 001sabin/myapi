@@ -12,6 +12,7 @@ namespace myapi.Repositories
         private readonly string _connectionString;
         public DapperEmployeeRepository(IConfiguration configuration)
         {
+            
             //_connectionString = configuration.GetConnectionString("DefaultConnection")!;
             _connectionString = configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentNullException(nameof(configuration), "Connectio string not found vetena hai maile ta");
         }
