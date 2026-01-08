@@ -78,6 +78,7 @@ try
 
 
     var app = builder.Build();
+    app.UseSerilogRequestLogging();
 
     //iMiddleware wala LOgging ko lagi
     //app.UseMiddleware<iRequestLoggingMiddleware>();
@@ -112,6 +113,7 @@ try
     //    };
     //}
     Log.Information(" Host built successfully.");
+
 
     app.Run();
 }

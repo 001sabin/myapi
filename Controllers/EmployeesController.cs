@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using myapi.DTOs;
@@ -29,6 +30,8 @@ namespace myapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeResponseDto>>> GetEmployees()
         {
+                        _logger.LogInformation("Fetching all employees from the database {method}.",HttpContext.Request.Method);
+
             var employees = await _service.GetEmployeesAsync();
             return Ok(employees);
         }
@@ -36,7 +39,7 @@ namespace myapi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeResponseDto>> GetEmployee(int id)
         {
-            _logger.LogInformation("Fetching employee with ID: {EmployeeId}", id);
+           
             var employee = await _service.GetEmployeeByIdAsync(id);
 
             if (employee == null)
@@ -54,6 +57,7 @@ namespace myapi.Controllers
             //    return BadRequest("Invalid employee name");
 
             var created = await _service.CreateEmployeeAsync(createDto);
+            _logger.LogInformation("User is creating employee {@Employee}", createDto);
             return CreatedAtAction(nameof(GetEmployee), new { id = created.Id }, created);
         }
 
@@ -67,7 +71,10 @@ namespace myapi.Controllers
             var success = await _service.UpdateEmployeeAsync(id, updateDto);
 
             if (!success)
+            {
+                _logger.LogInformation("User is updating employee {@Employee}", updateDto);
                 return NotFound("Employee not found");
+            }
 
             return NoContent();
         }

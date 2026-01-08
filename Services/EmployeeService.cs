@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
+using myapi.Controllers;
 using myapi.Data;
 using myapi.Delegates;
 using myapi.DTOs;
@@ -19,15 +20,18 @@ namespace myapi.Services
         
         private readonly IEmployeeRepository _repository
             ;
-        public EmployeeService( IMapper mapper, IEmployeeRepository repository)
+        private readonly ILogger<EmployeeService> _logger;
+        public EmployeeService( IMapper mapper, IEmployeeRepository repository,ILogger<EmployeeService> logger)
         {
           
             _mapper = mapper;
             _repository = repository;
+            _logger = logger;
         }
 
         public async Task<List<EmployeeResponseDto>> GetEmployeesAsync()
         {
+            _logger.LogInformation("Fetching all employees from the database.");
             //var employees = await _context.Employees.ToListAsync();
             //return _mapper.Map<List<EmployeeResponseDto>>(employees);
 
