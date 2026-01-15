@@ -78,14 +78,14 @@ try
 
 
     var app = builder.Build();
-    app.UseSerilogRequestLogging();
+    //app.UseSerilogRequestLogging();
 
     //iMiddleware wala LOgging ko lagi
     //app.UseMiddleware<iRequestLoggingMiddleware>();
 
     //app.UseMiddleware<RateLimitingMiddleware>();
 
-    //app.UseMiddleware<RequestLoggingMiddleware>();
+    app.UseMiddleware<RequestLoggingMiddleware>();
 
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())

@@ -31,7 +31,7 @@ namespace myapi.Services
 
         public async Task<List<EmployeeResponseDto>> GetEmployeesAsync()
         {
-            _logger.LogInformation("Fetching all employees from the database.");
+            _logger.LogInformation("Fetching all employees from the database(Service).");
             //var employees = await _context.Employees.ToListAsync();
             //return _mapper.Map<List<EmployeeResponseDto>>(employees);
 
@@ -43,7 +43,7 @@ namespace myapi.Services
         {
             //var employee=  await _context.Employees.FindAsync(id);
             //return employee == null ? null : _mapper.Map<EmployeeResponseDto>(employee);
-
+            _logger.LogInformation("Fetching employee with ID: {EmployeeId} from the database.", id);
             var employee = await _repository.GetEmployeeByIdAsync(id);
             return employee == null ? null : _mapper.Map<EmployeeResponseDto>(employee);
         }

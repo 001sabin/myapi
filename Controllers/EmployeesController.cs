@@ -30,7 +30,7 @@ namespace myapi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EmployeeResponseDto>>> GetEmployees()
         {
-                        _logger.LogInformation("Fetching all employees from the database {method}.",HttpContext.Request.Method);
+                        _logger.LogInformation("Fetching all employees from the database(Controller)");
 
             var employees = await _service.GetEmployeesAsync();
             return Ok(employees);

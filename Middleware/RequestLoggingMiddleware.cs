@@ -1,60 +1,62 @@
-﻿using System.Diagnostics;
+﻿using Serilog.Context;
+using System.Diagnostics;
 
 namespace myapi.Middleware
 {
-
-  
     public class RequestLoggingMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<RequestLoggingMiddleware> _logger;
+
         public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
         {
             _next = next;
             _logger = logger;
         }
+
         public async Task InvokeAsync(HttpContext context)
         {
             var stopwatch = Stopwatch.StartNew();
 
-            var method = context.Request.Method;
+            // 1. Generate or catch a Correlation ID
+            var correlationId = Guid.NewGuid().ToString();
 
-            var path = context.Request.Path;
-
-            var queryString = context.Request.QueryString.Value;  //.HasValue ? context.Request.QueryString.Value : string.Empty;
-
-
-           try {
-                await _next(context);
-                stopwatch.Stop();
-                var statusCode = context.Response.StatusCode;
-
-                if (statusCode >= 500)
+            // 2. LogContext.PushProperty "tags" every log entry inside this block
+            using (LogContext.PushProperty("CorrelationId", correlationId))
+            using (LogContext.PushProperty("ClientIP", context.Connection.RemoteIpAddress?.ToString() ?? "unknown"))
+            using (LogContext.PushProperty("UserAgent", context.Request.Headers["User-Agent"].ToString()))
+            {
+                try
                 {
-                    _logger.LogError("HTTP {Method} {Path}{QueryString} responded {StatusCode} in {ElapsedMilliseconds}ms",
-                        method, path, queryString, statusCode, stopwatch.ElapsedMilliseconds);
+                    // Continue the pipeline
+                    await _next(context);
+
+                    stopwatch.Stop();
+                    var statusCode = context.Response.StatusCode;
+
+                    // 3. Log the completion of the request
+                    // We use structured logging templates
+                    var level = statusCode >= 500 ? LogLevel.Error : (statusCode >= 400 ? LogLevel.Warning : LogLevel.Information);
+
+                    //_logger.Log(level,
+                    //    "Handled {Method} {Path} responded {StatusCode} in {ElapsedMilliseconds} ms",
+                    //    context.Request.Method,
+                    //    context.Request.Path,
+                    //    statusCode,
+                    //    stopwatch.ElapsedMilliseconds);
                 }
-                else if (statusCode >= 400)
+                catch (Exception ex)
                 {
-                    _logger.LogWarning("HTTP {Method} {Path}{QueryString} responded {StatusCode} in {ElapsedMilliseconds}ms",
-                        method, path, queryString, statusCode, stopwatch.ElapsedMilliseconds);
+                    stopwatch.Stop();
+                    _logger.LogError(ex,
+                        "Request {Method} {Path} failed after {ElapsedMilliseconds} ms",
+                        context.Request.Method,
+                        context.Request.Path,
+                        stopwatch.ElapsedMilliseconds);
+
+                    throw; // Re-throw so Global Exception handler or framework can catch it
                 }
-                else
-                {
-                    _logger.LogInformation("HTTP {Method} {Path}{QueryString} responded {StatusCode} in {ElapsedMilliseconds}ms",
-                        method, path, queryString, statusCode, stopwatch.ElapsedMilliseconds);
-                }
-                
-            } catch(Exception ex) {
-
-                stopwatch.Stop();
-
-                _logger.LogError(ex, "HTTP {Method} {Path}{QueryString} threw an exception after {ElapsedMilliseconds}ms",
-                    method, path, queryString, stopwatch.ElapsedMilliseconds);
-
-                throw;// yeslai throw garera feri universal or next middleware ko handler ma pathako
             }
-
         }
     }
 }
