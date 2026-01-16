@@ -12,6 +12,7 @@ using Serilog;
 
 using myapi.Repositories;
 using Serilog.Events;
+using myapi.ExtensionMethods;
 
 
 //var builder = WebApplication.CreateBuilder(args);
@@ -40,14 +41,17 @@ try
     // we have registered the dbcontext this is DI
     //builder.Services.AddDbContext<AppDbContext>(options =>
     //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-    // Explicit delegate creation
-    void ConfigureDbContext(DbContextOptionsBuilder options)
-    {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-    }
-    Action<DbContextOptionsBuilder> myDelegate = ConfigureDbContext;
-    builder.Services.AddDbContext<AppDbContext>(myDelegate);
 
+    builder.Services.AddSqlServiceExtension(builder.Configuration);// this class is define as extension service in ExtensionMethods folder
+    // Explicit delegate creation
+
+    //void ConfigureDbContext(DbContextOptionsBuilder options)
+    //{
+    //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    //}
+    //Action<DbContextOptionsBuilder> myDelegate = ConfigureDbContext;
+    //builder.Services.AddDbContext<AppDbContext>(myDelegate);
+    builder.Services.AddRedisServiceExtension(builder.Configuration);
 
     // Dapper through get method implement garna lai 
     builder.Services.AddScoped<IEmployeeRepository, DapperEmployeeRepository>();
@@ -65,6 +69,8 @@ try
 
     //Imiddleware implemetation ko example ko lagi
     builder.Services.AddScoped<iRequestLoggingMiddleware>();
+
+    builder.Services.AddMemoryCache();
 
     builder.Services.AddControllers().AddNewtonsoftJson();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
