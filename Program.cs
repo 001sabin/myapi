@@ -77,6 +77,8 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    builder.Services.AddResponseCaching();
+
 
 
 
@@ -102,11 +104,13 @@ try
 
 
     app.UseHttpsRedirection();
-
+    app.UseResponseCaching();
 
     app.UseAuthorization();
     //app.MapGet("/api/hello", () => "Hello World!");
     app.MapControllers();
+
+
 
 
     //using (var scope = app.Services.CreateScope())

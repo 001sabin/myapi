@@ -38,6 +38,7 @@ namespace myapi.Controllers
         }
 
         [HttpGet("{id}")]
+        [ResponseCache(Duration =120, Location = ResponseCacheLocation.Any, VaryByHeader ="Accept-Encoding")]
         public async Task<ActionResult<EmployeeResponseDto>> GetEmployee(int id)
         {
            
@@ -48,6 +49,7 @@ namespace myapi.Controllers
                 _logger.LogWarning("Employee with ID: {EmployeeId} was not found", id);
                 return NotFound("Employee not found");
             }
+            _logger.LogInformation("Controller executed for employee {Id}", id);
             return Ok(employee);
         }
 
