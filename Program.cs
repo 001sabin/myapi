@@ -51,6 +51,10 @@ try
     //}
     //Action<DbContextOptionsBuilder> myDelegate = ConfigureDbContext;
     //builder.Services.AddDbContext<AppDbContext>(myDelegate);
+
+    //adding the IDentityDbContext -> AuthContext
+    builder.Services.AddIdentityServices(builder.Configuration);
+
     builder.Services.AddRedisServiceExtension(builder.Configuration);
 
     // Dapper through get method implement garna lai 
